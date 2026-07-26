@@ -1,0 +1,12 @@
+# Ignore compiled binaries and exploits
+exploit
+*.out
+*.exe
+
+# Ignore Mac/Windows system files
+.DS_Store
+Thumbs.db
+
+# Ignore Python cache
+__pycache__/
+*.pyc
