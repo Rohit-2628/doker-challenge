@@ -1,10 +1,15 @@
-FROM ubuntu:22.04
+FROM python:3.9-slim
 
-RUN apt-get update && apt-get install -y python3 socat
+WORKDIR /app
 
-COPY server_c.py /opt/server_c.py
-COPY entrypoint.sh /opt/entrypoint.sh
-RUN chmod +x /opt/entrypoint.sh
+# Force the container to run as root so it can write to /tmp_sock
+USER root
 
-ENTRYPOINT ["/opt/entrypoint.sh"]
+# Install exactly what we need
+RUN pip install --no-cache-dir flask gunicorn
 
+# Copy the server code
+COPY app.py .
+
+# Bind directly to the socket
+CMD ["gunicorn", "--bind", "unix:/tmp_sock/.sys.sock", "app:app"]

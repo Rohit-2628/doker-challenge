@@ -1,44 +1,54 @@
-version: '3.8'
-
 services:
+  # The Decoy Vault (Container A)
   container_a:
     build: ./container_a
-    networks:
-      ctf_net:
-        ipv4_address: 172.20.0.10
+    ports:
+      - "8001:8001"
+      - "9000:9000"
     volumes:
-      - auth_sync:/auth_sync
-    restart: unless-stopped
+      - auth_sync_vol:/auth_sync
+    # Add the deploy block HERE, indented under the service name
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
-  container_b:
+  # The Real Vault (Container C)
+  container_c:
+    build: ./container_c
+    volumes:
+      - auth_sync_vol:/auth_sync
+      - tmp_sock_vol:/tmp_sock
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # Container D: The Ghost Bot (Generates keys and noise)
+  bot_engine:
+    build: ./container_bot
+    volumes:
+      - auth_sync_vol:/auth_sync
+      - tmp_sock_vol:/tmp_sock
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # Container B: The Player Shell (Shares the Bot's Process List)
+  player_shell:
     build: ./container_b
     ports:
       - "2222:22"
-    networks:
-      ctf_net:
-        ipv4_address: 172.20.0.11
+    pid: "service:bot_engine"
     volumes:
-      - auth_sync:/auth_sync
-      - socket_vol:/tmp_sock
-    restart: unless-stopped
-
-  container_c:
-    build: ./container_c
-    environment:
-      - FLAG=${FLAG:-flag{local_test_dynamic_flag_999}} 
-    networks:
-      ctf_net:
-        ipv4_address: 172.20.0.12
-    volumes:
-      - socket_vol:/sock_data
-    restart: unless-stopped
-
-networks:
-  ctf_net:
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
+      - tmp_sock_vol:/tmp_sock
+      - auth_sync_vol:/auth_sync
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
 volumes:
-  auth_sync:
-  socket_vol:
+  auth_sync_vol:
+  tmp_sock_vol:

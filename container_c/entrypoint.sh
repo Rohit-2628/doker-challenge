@@ -1,4 +1,7 @@
 #!/bin/bash
-python3 /opt/server_c.py &
-rm -f /sock_data/.sys.sock
-socat UNIX-LISTEN:/sock_data/.sys.sock,fork,mode=777 TCP:127.0.0.1:8080
+
+# 1. Wipe out any ghost sockets left over from previous runs
+rm -f /tmp_sock/.sys.sock
+
+# 2. Start the Vault C server
+exec python3 /opt/server_c.py
