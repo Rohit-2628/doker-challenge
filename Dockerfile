@@ -2,6 +2,21 @@ FROM ubuntu:22.04
 
 # Avoid timezone/keyboard prompts during install
 ENV DEBIAN_FRONTEND=noninteractive
+FROM ubuntu:22.04
+
+# Prevent timezone and keyboard prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
+# Install all necessary tools
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    curl \
+    openssh-server \
+    nano \
+    net-tools \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install all necessary tools for the APIs and the player
 RUN apt-get update && apt-get install -y \
