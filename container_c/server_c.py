@@ -46,4 +46,4 @@ class RealVaultServer(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b"FAIL: Invalid Vault Key.\n")
 
-HTTPServer(('127.0.0.1', 8080), RealVaultServer).serve_forever()
+HTTPServer(('127.0.0.1', 8081), RealVaultServer).serve_forever()

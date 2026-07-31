@@ -1,18 +1,22 @@
-# Use a lightweight Debian-based Python image instead of full Ubuntu
-# This eliminates the need to compile Python from scratch during the build
 FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-# --no-install-recommends prevents downloading unnecessary bloat/documentation
-# We only install the bare minimum tools required for the challenge
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    openssh-server \
-    nano \
-    net-tools \
-    && rm -rf /var/lib/apt/lists/*
+# 1. Update the package lists quietly
+RUN apt-get update -qq
+
+# 2. Install lightweight tools (Layer 1)
+RUN apt-get install -yqq --no-install-recommends curl nano net-tools
+
+# 3. Install SSH server separately (Layer 2 - Heaviest step)
+RUN apt-get install -yqq --no-install-recommends openssh-server
+# 3. Install SSH server separately (Layer 2 - Heaviest step)
+RUN apt-get install -yqq --no-install-recommends openssh-server && \
+    echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+
+# 4. Clean up the cache to free up disk space
+RUN rm -rf /var/lib/apt/lists/*
 
 # Create the shared directories
 RUN mkdir -p /auth_sync /tmp_sock /var/run/sshd
